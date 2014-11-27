@@ -18,6 +18,7 @@ module Tugboat
     DEFAULT_SSH_KEY = ''
     DEFAULT_PRIVATE_NETWORKING = 'false'
     DEFAULT_BACKUPS_ENABLED = 'false'
+    DEFAULT_CACHE_ENABLED = 'false'
 
     def initialize
       @path = ENV["TUGBOAT_CONFIG_PATH"] || File.join(File.expand_path("~"), FILE_NAME)
@@ -77,6 +78,10 @@ module Tugboat
       @data['defaults'].nil? ? DEFAULT_BACKUPS_ENABLED : @data['defaults']['backups_enabled']
     end
 
+    def cache_enabled
+      @data['cache_enabled']
+    end
+
     # Re-runs initialize
     def reset!
       self.send(:initialize)
@@ -88,7 +93,7 @@ module Tugboat
     end
 
     # Writes a config file
-    def create_config_file(client, api, ssh_key_path, ssh_user, ssh_port, region, image, size, ssh_key, private_networking, backups_enabled)
+    def create_config_file(client, api, ssh_key_path, ssh_user, ssh_port, region, image, size, ssh_key, private_networking, backups_enabled, cache_enabled)
       # Default SSH Key path
       if ssh_key_path.empty?
         ssh_key_path = File.join(File.expand_path("~"), DEFAULT_SSH_KEY_PATH)
@@ -126,6 +131,10 @@ module Tugboat
         backups_enabled = DEFAULT_BACKUPS_ENABLED
       end
 
+      if cache_enabled.empty?
+        cache_enabled = DEFAULT_CACHE_ENABLED
+      end
+
       require 'yaml'
       File.open(@path, File::RDWR|File::TRUNC|File::CREAT, 0600) do |file|
         data = {
@@ -143,7 +152,8 @@ module Tugboat
                   "ssh_key" => ssh_key,
                   "private_networking" => private_networking,
                   "backups_enabled" => backups_enabled
-                }
+                },
+                "cache_enabled" => cache_enabled
         }
         file.write data.to_yaml
       end

@@ -5,7 +5,32 @@ module Tugboat
       def call(env)
         ocean = env["ocean"]
 
-        droplet_list = ocean.droplets.list.droplets
+        cache_enabled = env["user_cache_enabled"] || env["config"].cache_enabled
+
+        file_name = '.tugboat.cache'
+
+        @path = ENV["TUGBOAT_CACHE_PATH"] || File.join(File.expand_path("~"), file_name)
+
+        require 'yaml'
+
+        write_file = false
+        if cache_enabled
+          begin
+            droplet_list = YAML.load_file(@path)
+          rescue Errno::ENOENT
+            droplet_list = ocean.droplets.list.droplets
+            write_file = true
+          end
+        else
+          droplet_list = ocean.droplets.list.droplets
+          write_file = true
+        end
+
+        if write_file
+          File.open(@path, File::RDWR|File::TRUNC|File::CREAT, 0600) do |file|
+            file.write droplet_list.to_yaml
+          end
+        end
 
         if droplet_list.empty?
           say "You don't appear to have any droplets.", :red

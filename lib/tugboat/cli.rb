@@ -52,8 +52,13 @@ module Tugboat
     end
 
     desc "droplets", "Retrieve a list of your droplets"
+    method_option "cache",
+                  :type => :boolean,
+                  :default => false,
+                  :desc => "Cache droplet information"
     def droplets
       Middleware.sequence_list_droplets.call({
+        "user_cache_enabled" => options[:cache],
         "user_quiet" => options[:quiet]
         })
     end

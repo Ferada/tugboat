@@ -23,7 +23,7 @@ module Tugboat
         backups_enabled = ask "Enter your default for enabling backups (optional, defaults to false):"
 
         # Write the config file.
-        env['config'].create_config_file(client_key, api_key, ssh_key_path, ssh_user, ssh_port, region, image, size, ssh_key, private_networking, backups_enabled)
+        env['config'].create_config_file(client_key, api_key, ssh_key_path, ssh_user, ssh_port, region, image, size, ssh_key, private_networking, backups_enabled, false)
         env['config'].reload!
 
         @app.call(env)
